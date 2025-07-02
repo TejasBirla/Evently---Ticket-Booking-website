@@ -1,0 +1,13 @@
+.payment-status-page {
+    text-align: center;
+    padding-top: 5rem;
+    margin-bottom: 13rem;
+}
+
+.success-msg {
+    color: green;
+}
+
+.error-msg {
+    color: red;
+}

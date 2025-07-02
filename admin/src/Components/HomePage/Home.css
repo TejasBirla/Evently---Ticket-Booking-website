@@ -1,0 +1,40 @@
+.home-container {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 40px;
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.home-container h1 {
+    color: #3838ff;
+    margin-bottom: 20px;
+}
+
+.home-container p {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.button-group button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #3838ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.button-group button:hover {
+    background-color: #2e2ed8;
+}

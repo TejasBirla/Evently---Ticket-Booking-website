@@ -1,0 +1,57 @@
+.delete-event-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 35px;
+    background-color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.delete-event-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #252525;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.delete-event-container select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 25px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    appearance: none;
+    outline: none;
+    transition: border 0.3s ease;
+}
+
+.delete-event-container select:focus {
+    border-color: #ff4d4d;
+    background-color: #fff;
+}
+
+.delete-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #ff4d4d;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #e04343;
+}
+
+.delete-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

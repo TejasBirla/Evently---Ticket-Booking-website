@@ -1,0 +1,70 @@
+.carousel-wrapper {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.carousel-heading {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #111827;
+    text-align: center;
+}
+
+.event-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    max-height: 100%;
+    height: 420px;
+    margin-bottom: 15px;
+}
+
+.event-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.event-swiper {
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.event-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.all-event-info {
+    padding: 16px;
+}
+
+.all-event-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 7px;
+}
+
+.all-event-info .all-event-date,
+.all-event-location {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.all-event-desc {
+    font-size: 17px;
+    color: #374151;
+    margin-top: 7px;
+    max-height: 66px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-events-msg {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 18px
+}
