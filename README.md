@@ -35,10 +35,10 @@ The admin panel is a separate **React** (Vite) application that allows administr
 
 ## 🧑‍💻 Tech Stack
 
-- **Frontend**: React, Axios, React Router
+- **Frontend**: Vite + React, Axios, React Router
 - **Backend**: Node.js, Express, MongoDB, Mongoose
-- **Admin**: React
-- **Payments**: Cashfree PG
+- **Admin**: Vite + React
+- **Payments**: Cashfree (Sandbox for testing purpose)
 
 ---
 
