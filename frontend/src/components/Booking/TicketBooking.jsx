@@ -27,7 +27,10 @@ export default function TicketBooking() {
   const rightRows = rows.slice(5);
 
   const isSeatBooked = (seatId) => {
-    return singleEvent?.bookedSeats?.includes(seatId);
+    if (!selectedTime || !singleEvent?.bookedSeats) return false;
+
+    const seatsForTime = singleEvent.bookedSeats[selectedTime] || [];
+    return seatsForTime.includes(seatId);
   };
 
   const toggleSeat = (seatId) => {
@@ -54,7 +57,7 @@ export default function TicketBooking() {
     }
 
     const unavailableSeats = selectedSeats.filter((seat) =>
-      singleEvent.bookedSeats.includes(seat)
+      (singleEvent.bookedSeats[selectedTime] || []).includes(seat)
     );
 
     if (unavailableSeats.length > 0) {
@@ -112,8 +115,11 @@ export default function TicketBooking() {
       singleEvent &&
       singleEvent.bookedSeats
     ) {
+      const bookedForSavedTime =
+        singleEvent.bookedSeats[savedData.selectedTime] || [];
+
       const validSeats = savedData.selectedSeats?.filter(
-        (seat) => !singleEvent.bookedSeats.includes(seat)
+        (seat) => !bookedForSavedTime.includes(seat)
       );
 
       if (validSeats.length !== savedData.selectedSeats.length) {
@@ -125,7 +131,6 @@ export default function TicketBooking() {
       setSelectedSeats(validSeats || []);
       if (savedData.selectedTime) setSelectedTime(savedData.selectedTime);
 
-      // Now safe to remove
       setTimeout(() => {
         localStorage.removeItem("redirectAfterLogin");
       }, 100);
@@ -145,7 +150,10 @@ export default function TicketBooking() {
                 className={`time-item ${
                   selectedTime === t ? "selected-time" : ""
                 }`}
-                onClick={() => setSelectedTime(t)}
+                onClick={() => {
+                  setSelectedTime(t);
+                  setSelectedSeats([]); // reset seat selection when time changes
+                }}
               >
                 {formatTime(t)}
               </div>
