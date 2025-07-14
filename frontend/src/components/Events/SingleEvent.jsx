@@ -31,9 +31,17 @@ export default function SingleEvent() {
           <CalendarDays size={18} className="icon" />{" "}
           {formatDate(singleEvent.date)}
         </p>
-        <p className="event-time">
-          <Clock size={18} className="icon" /> {formatTime(singleEvent.time)}
-        </p>
+
+        <div className="event-time">
+          <Clock size={18} className="icon" />
+          {singleEvent.time.map((t, idx) => (
+            <span key={idx}>
+              {formatTime(t)}
+              {idx !== singleEvent.time.length - 1 ? ", " : ""}
+            </span>
+          ))}
+        </div>
+
         <p className="event-location">
           <MapPin size={18} className="icon" /> {singleEvent.venue}
         </p>
