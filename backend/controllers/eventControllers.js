@@ -49,6 +49,17 @@ export const createEvent = async (req, res) => {
     const { title, description, date, time, venue, price, totalSeats, image } =
       req.body;
 
+    if (
+      !Array.isArray(time) ||
+      time.length === 0 ||
+      time.some((t) => t.trim() === "")
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide at least one valid showtime.",
+      });
+    }
+
     // Upload image to Cloudinary
     let uploadedImageUrl = "";
     let uploadedImageID = "";
@@ -104,17 +115,12 @@ export const deleteEvent = async (req, res) => {
       await cloudinary.uploader.destroy(event.imagePublicId);
     }
 
-    const booking = await Booking.findOneAndDelete({ event });
-    if (booking) {
-      res.status(200).json({
-        success: true,
-        message: "All bookings deleted for this event.",
-      });
-    }
+    await Booking.deleteMany({ event });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Event deleted successfully." });
+    return res.status(200).json({
+      success: true,
+      message: "Event and all its bookings deleted successfully.",
+    });
   } catch (error) {
     console.log("Error in deleting event: ", error.message);
     return res
