@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const initiateBookingPayment = async (req, res) => {
   try {
-    const { eventID, seats } = req.body;
+    const { eventID, seats, time } = req.body;
     const user = req.user;
 
     // Fetch event from DB
@@ -15,12 +15,20 @@ export const initiateBookingPayment = async (req, res) => {
       });
     }
 
-    // Check if selected seats are already booked
-    const isConflict = seats.some((seat) => event.bookedSeats.includes(seat));
+    if (!time) {
+      return res.status(400).json({
+        success: false,
+        message: "Showtime is required for booking.",
+      });
+    }
+
+    // Check if selected seats are already booked for the selected time
+    const bookedSeatsAtTime = event.bookedSeats?.[time] || [];
+    const isConflict = seats.some((seat) => bookedSeatsAtTime.includes(seat));
     if (isConflict) {
       return res.status(400).json({
         success: false,
-        message: "One or more selected seats are already booked.",
+        message: "One or more selected seats are already booked at this time.",
       });
     }
 
@@ -43,7 +51,7 @@ export const initiateBookingPayment = async (req, res) => {
           customer_phone: user.phone || "9999999999",
         },
         order_meta: {
-          return_url: `${process.env.FRONTEND_URL}/payment-success?order_id=${order_id}`, // 🔁 use env var in prod
+          return_url: `${process.env.FRONTEND_URL}/payment-success?order_id=${order_id}`,
         },
         order_note: `Booking for ${event.title}`,
       },
@@ -69,6 +77,7 @@ export const initiateBookingPayment = async (req, res) => {
       eventID,
       seats,
       amount: totalAmount,
+      time,
     });
   } catch (error) {
     console.error("Error initiating booking:", error.message);
