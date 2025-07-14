@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [events, setAllEvents] = useState([]);
   const [singleEvent, setSingleEvent] = useState(null);
   const [allBookingDetails, setAllBookingDetails] = useState([]);
+  const [redirectUrl, setRedirectUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
   //navigate to other pages
@@ -29,6 +30,15 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (authUser && redirectUrl) {
+      setTimeout(() => {
+        navigate(redirectUrl);
+        setRedirectUrl(null);
+      }, 50);
+    }
+  }, [authUser, redirectUrl, navigate]);
 
   const signupUser = async (signupData) => {
     try {
@@ -56,12 +66,21 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("authUser", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+        const redirectData = JSON.parse(
+          localStorage.getItem("redirectAfterLogin")
+        );
         toast.success(data.message);
-        navigate("/");
+
+        if (redirectData?.path) {
+          setRedirectUrl(redirectData.path); //set state, don't navigate yet
+        } else {
+          navigate("/"); // fallback
+        }
       }
     } catch (error) {
       console.error("Login Error:", error.message);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 
