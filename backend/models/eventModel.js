@@ -35,8 +35,9 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
     bookedSeats: {
-      type: [String], 
-      default: [],
+      type: Map,
+      of: [String],
+      default: new Map(),
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
