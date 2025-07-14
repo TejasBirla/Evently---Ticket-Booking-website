@@ -131,6 +131,7 @@ export const AuthProvider = ({ children }) => {
           orderId,
           eventID: bookingInfo.eventID,
           seats: bookingInfo.seats,
+          time:bookingInfo.time,
           amount,
         })
       );

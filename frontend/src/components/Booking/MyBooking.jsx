@@ -20,8 +20,8 @@ export default function MyBooking() {
   };
 
   const handleCancelConfirmed = () => {
-    const { eventID, seats, amount } = selectedBooking;
-    const bookingData = { eventID, seats, amount };
+    const { eventID, seats, amount, time } = selectedBooking;
+    const bookingData = { eventID, seats, amount, time };
     cancelBooking(bookingData);
     setShowConfirm(false);
   };
@@ -71,7 +71,7 @@ export default function MyBooking() {
               <strong>Date:</strong> {formatDate(booking?.event?.date)}
             </p>
             <p>
-              <strong>Time:</strong> {formatTime(booking?.event?.time)}
+              <strong>Time:</strong> {formatTime(booking?.time)}
             </p>
             <p>
               <strong>Venue:</strong> {booking?.event?.venue}
@@ -88,6 +88,7 @@ export default function MyBooking() {
                 openConfirm({
                   eventID: booking.event._id,
                   seats: booking.seats,
+                  time: booking.time,
                   amount: booking.totalAmount,
                 })
               }
