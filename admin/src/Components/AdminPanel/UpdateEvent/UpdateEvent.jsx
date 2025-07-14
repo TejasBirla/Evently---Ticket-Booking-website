@@ -11,7 +11,7 @@ export default function UpdateEvent() {
     title: "",
     description: "",
     date: "",
-    time: "",
+    time: [""],
     venue: "",
     price: "",
     totalSeats: "",
@@ -36,7 +36,9 @@ export default function UpdateEvent() {
         title: singleEvent.title || "",
         description: singleEvent.description || "",
         date: singleEvent.date?.slice(0, 10) || "",
-        time: singleEvent.time || "",
+        time: Array.isArray(singleEvent.time)
+          ? singleEvent.time
+          : [singleEvent.time || ""],
         venue: singleEvent.venue || "",
         price: singleEvent.price || "",
         totalSeats: singleEvent.totalSeats || "",
@@ -58,10 +60,31 @@ export default function UpdateEvent() {
     }
   };
 
+  const handleTimeChange = (index, value) => {
+    const updatedTimes = [...formData.time];
+    updatedTimes[index] = value;
+    setFormData((prev) => ({ ...prev, time: updatedTimes }));
+  };
+
+  const addTimeField = () => {
+    setFormData((prev) => ({ ...prev, time: [...prev.time, ""] }));
+  };
+
+  const removeTimeField = (index) => {
+    const updatedTimes = formData.time.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, time: updatedTimes }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedEventId) return;
-    updateEvent(selectedEventId, formData);
+    const cleanTimes = formData.time.filter((t) => t.trim() !== "");
+    const uniqueTimes = new Set(cleanTimes);
+    if (uniqueTimes.size !== cleanTimes.length) {
+      alert("Duplicate showTimes are not allowed");
+      return;
+    }
+    updateEvent(selectedEventId, { ...formData, time: cleanTimes });
   };
 
   return (
@@ -98,12 +121,31 @@ export default function UpdateEvent() {
             value={formData.date}
             onChange={handleChange}
           />
-          <input
-            type="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-          />
+
+          <label>Showtimes:</label>
+          {formData.time.map((t, index) => (
+            <div className="time-input-row" key={index}>
+              <input
+                type="time"
+                required
+                value={t}
+                onChange={(e) => handleTimeChange(index, e.target.value)}
+              />
+              {formData.time.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeTimeField(index)}
+                  className="remove-btn"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={addTimeField}>
+            + Add Show Time
+          </button>
+
           <input
             type="text"
             name="venue"
