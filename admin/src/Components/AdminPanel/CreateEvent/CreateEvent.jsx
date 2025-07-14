@@ -4,11 +4,12 @@ import { EventContext } from "../../../Contexts/EventContext.jsx";
 
 export default function CreateEvent() {
   const { createEvent } = useContext(EventContext);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     date: "",
-    time: "",
+    time: [""], // Initialize with one time input
     venue: "",
     price: "",
     totalSeats: "",
@@ -28,26 +29,48 @@ export default function CreateEvent() {
     }
   };
 
+  const handleTimeChange = (index, value) => {
+    const updatedTimes = [...formData.time];
+    updatedTimes[index] = value;
+    setFormData({ ...formData, time: updatedTimes });
+  };
+
+  const addTimeField = () => {
+    setFormData({ ...formData, time: [...formData.time, ""] });
+  };
+
+  const removeTimeField = (index) => {
+    const updatedTimes = formData.time.filter((_, i) => i !== index);
+    setFormData({ ...formData, time: updatedTimes });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const success = await createEvent(formData);
+    // Make sure no empty time is submitted
+    const cleanTimes = formData.time.filter((t) => t.trim() !== "");
+    const uniqueTimes = new Set(cleanTimes);
+    if (uniqueTimes.size !== cleanTimes.length) {
+      alert("Duplicate showTimes are not allowed");
+      return;
+    }
+    const success = await createEvent({ ...formData, time: cleanTimes });
 
-    // Clear the form fields after successful creation
     if (success) {
       setFormData({
         title: "",
         description: "",
         date: "",
-        time: "",
+        time: [""],
         venue: "",
         price: "",
         totalSeats: "",
         image: "",
       });
 
-      if (document.getElementById("event-image")) {
-        document.getElementById("event-image").value = "";
+      const imageInput = document.getElementById("event-image");
+      if (imageInput) {
+        imageInput.value = "";
       }
     }
   };
@@ -64,6 +87,7 @@ export default function CreateEvent() {
           value={formData.title}
           onChange={handleChange}
         />
+
         <textarea
           name="description"
           placeholder="Description"
@@ -71,6 +95,7 @@ export default function CreateEvent() {
           value={formData.description}
           onChange={handleChange}
         />
+
         <input
           type="date"
           name="date"
@@ -78,13 +103,30 @@ export default function CreateEvent() {
           value={formData.date}
           onChange={handleChange}
         />
-        <input
-          type="time"
-          name="time"
-          required
-          value={formData.time}
-          onChange={handleChange}
-        />
+
+        <label>Showtimes:</label>
+        {formData.time.map((t, index) => (
+          <div className="time-input-row" key={index}>
+            <input
+              type="time"
+              required
+              value={t}
+              onChange={(e) => handleTimeChange(index, e.target.value)}
+            />
+            {formData.time.length > 1 && (
+              <button
+                onClick={() => removeTimeField(index)}
+                className="remove-btn"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+        <button type="button" onClick={addTimeField}>
+          + Add Show Time
+        </button>
+
         <input
           type="text"
           name="venue"
@@ -93,6 +135,7 @@ export default function CreateEvent() {
           value={formData.venue}
           onChange={handleChange}
         />
+
         <input
           type="number"
           name="price"
@@ -101,6 +144,7 @@ export default function CreateEvent() {
           value={formData.price}
           onChange={handleChange}
         />
+
         <input
           type="number"
           name="totalSeats"
@@ -109,6 +153,7 @@ export default function CreateEvent() {
           value={formData.totalSeats}
           onChange={handleChange}
         />
+
         <input
           type="file"
           name="image"
@@ -116,6 +161,7 @@ export default function CreateEvent() {
           id="event-image"
           onChange={handleChange}
         />
+
         <button type="submit">Create Event</button>
       </form>
     </div>
