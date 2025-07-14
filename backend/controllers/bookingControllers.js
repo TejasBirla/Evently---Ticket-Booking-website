@@ -5,10 +5,16 @@ import axios from "axios";
 
 export const finalizePaidBooking = async (req, res) => {
   try {
-    const { orderId, eventID, seats, amount } = req.body;
+    const { orderId, eventID, seats, amount, time } = req.body;
     const user = req.user;
 
-    //Verify payment with Cashfree
+    if (!time) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Time is required" });
+    }
+
+    // Verify payment
     const response = await axios.get(
       `https://sandbox.cashfree.com/pg/orders/${orderId}`,
       {
@@ -28,17 +34,18 @@ export const finalizePaidBooking = async (req, res) => {
       });
     }
 
-    //Get event
+    // Get event
     const event = await Event.findById(eventID);
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found.",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found." });
     }
 
-    // Check seat availability again
-    const isConflict = seats.some((seat) => event.bookedSeats.includes(seat));
+    // Check time-specific seat conflicts
+    const timeSeats = event.bookedSeats?.get(time) || [];
+    const isConflict = seats.some((seat) => timeSeats.includes(seat));
+
     if (isConflict) {
       return res.status(400).json({
         success: false,
@@ -46,50 +53,43 @@ export const finalizePaidBooking = async (req, res) => {
       });
     }
 
-    //Create booking in DB
+    // Create booking
     const booking = await Booking.create({
       event: eventID,
       user: user._id,
       seats,
+      time,
       totalAmount: amount,
       paymentStatus: "PAID",
       paymentId: orderId,
     });
 
-    event.bookedSeats.push(...seats);
+    // Update bookedSeats
+    const updatedSeats = [...timeSeats, ...seats];
+    event.bookedSeats.set(time, updatedSeats);
     await event.save();
 
-    //Send confirmation email
+    // Send confirmation mail
     await transporter.sendMail({
       from: '"Evently Bhilwara" <yourmail@gmail.com>',
       to: user.email,
       subject: `🎟️ Ticket Confirmation for ${event.title}`,
       html: `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 24px; background-color: #f9f9f9; border-radius: 12px;">
-    <h2 style="text-align: center; color: #2c3e50;">🎉 Ticket Confirmation</h2>
-
-    <p style="font-size: 16px; color: #333;">Hi <strong>${
-      user.fullName
-    }</strong>,</p>
-    <p style="font-size: 16px; color: #333;">Thank you for booking with <strong>Evently Bhilwara</strong>!</p>
-
-    <div style="background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin: 20px 0;">
-      <h3 style="color: #3838ff; margin-top: 0;">🎟️ ${event.title}</h3>
-      <p><strong>Date:</strong> ${event.date.toDateString()}</p>
-      <p><strong>Venue:</strong> ${event.venue}</p>
-      <p><strong>Seats:</strong> ${seats.join(", ")}</p>
-      <p><strong>Total Paid:</strong> ₹${amount}</p>
-    </div>
-
-    <p style="font-size: 15px; color: #555;">This email confirms that your payment was successful and your seats have been reserved. You can show this email at the entry gate or access your ticket from your Evently dashboard.</p>
-
-    <p style="font-size: 14px; color: #999;">If you have any questions, feel free to contact us at <a href="mailto:support@evently.com">support@evently.com</a>.</p>
-
-    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-
-    <p style="font-size: 13px; color: #aaa; text-align: center;">&copy; ${new Date().getFullYear()} Evently Bhilwara. All rights reserved.</p>
-  </div>
-`,
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 24px; background-color: #f9f9f9; border-radius: 12px;">
+          <h2 style="text-align: center; color: #2c3e50;">🎉 Ticket Confirmation</h2>
+          <p style="font-size: 16px;">Hi <strong>${user.fullName}</strong>,</p>
+          <p>Thank you for booking with <strong>Evently Bhilwara</strong>!</p>
+          <div style="background-color: #fff; border-radius: 10px; padding: 20px; margin: 20px 0;">
+            <h3 style="color: #3838ff;">🎟️ ${event.title}</h3>
+            <p><strong>Date:</strong> ${event.date.toDateString()}</p>
+            <p><strong>Time:</strong> ${time}</p>
+            <p><strong>Venue:</strong> ${event.venue}</p>
+            <p><strong>Seats:</strong> ${seats.join(", ")}</p>
+            <p><strong>Total Paid:</strong> ₹${amount}</p>
+          </div>
+          <p>You can show this email at the gate or check your Evently dashboard.</p>
+        </div>
+      `,
     });
 
     return res.status(200).json({
@@ -108,27 +108,45 @@ export const finalizePaidBooking = async (req, res) => {
 
 export const cancelBooking = async (req, res) => {
   try {
-    const { eventID, seats, amount } = req.body;
-    if (!eventID || !seats || !amount) {
-      return res.json({ success: false, message: "Information missing" });
+    const { eventID, seats, amount, time } = req.body;
+
+    if (!eventID || !seats || !amount || !time) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Information missing" });
     }
+
     const user = req.user;
     const event = await Event.findById(eventID);
+
     if (!event) {
-      return res.json({ success: false, message: "Event not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found." });
     }
 
-    event.bookedSeats = event.bookedSeats.filter(
+    // Get the seats booked at the specified time using Map.get()
+    const bookedSeatsAtTime = event.bookedSeats.get(time) || [];
+
+    // Remove canceled seats from the booked seats at that time
+    const updatedSeats = bookedSeatsAtTime.filter(
       (seat) => !seats.includes(seat)
     );
+
+    // Update the Map with new seats array using Map.set()
+    event.bookedSeats.set(time, updatedSeats);
+
+    // Save updated event
     await event.save();
 
+    // Delete the booking documents for that user, event, and time
     await Booking.deleteMany({
       event: eventID,
       user: user._id,
+      time: time,
     });
-    
 
+    // Send refund email (your existing mail sending code)
     await transporter.sendMail({
       from: '"Evently Bhilwara"',
       to: user.email,
@@ -136,14 +154,12 @@ export const cancelBooking = async (req, res) => {
       html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 24px; background-color: #f9f9f9; border-radius: 12px;">
         <h2 style="text-align: center; color: #e67e22;">🔄 Refund Initiated</h2>
-    
         <p style="font-size: 16px; color: #333;">Hi <strong>${
           user.fullName
         }</strong>,</p>
         <p style="font-size: 16px; color: #333;">We're writing to confirm that your booking for the event <strong>${
           event.title
-        }</strong> has been successfully cancelled.</p>
-    
+        }</strong> at <strong>${time}</strong> has been successfully cancelled.</p>
         <div style="background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin: 20px 0;">
           <p><strong>Event:</strong> ${event.title}</p>
           <p><strong>Seats Cancelled:</strong> ${seats.join(", ")}</p>
@@ -152,13 +168,9 @@ export const cancelBooking = async (req, res) => {
             2
           )}</p>
         </div>
-    
         <p style="font-size: 15px; color: #555;">As per our cancellation policy, 50% of the amount has been refunded to your original payment method. Please allow 5–7 business days for the refund to reflect in your account.</p>
-    
         <p style="font-size: 14px; color: #999;">If you have any questions, feel free to contact us at <a href="mailto:support@evently.com">support@evently.com</a>.</p>
-    
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-    
         <p style="font-size: 13px; color: #aaa; text-align: center;">&copy; ${new Date().getFullYear()} Evently Bhilwara. All rights reserved.</p>
       </div>
       `,
@@ -169,7 +181,7 @@ export const cancelBooking = async (req, res) => {
       message: "Booking cancelled and seats released.",
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error cancelling booking:", error);
     return res.status(500).json({
       success: false,
       message: "Could not cancel the booking.",
