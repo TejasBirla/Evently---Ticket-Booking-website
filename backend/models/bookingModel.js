@@ -12,6 +12,10 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    time: {
+      type: String,
+      required: true,
+    },
     seats: {
       type: [String],
       required: true,
