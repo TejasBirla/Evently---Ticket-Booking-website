@@ -48,3 +48,17 @@
 .event-form button:hover {
     background-color: #2e2ed8;
 }
+
+.time-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-input-row input {
+    width: 150px;
+}
+
+.remove-btn{
+    margin-top: -15px;
+}
