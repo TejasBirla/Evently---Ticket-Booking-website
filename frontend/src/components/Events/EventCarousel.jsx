@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -10,10 +10,24 @@ import { formatDate } from "../../libs/util.js";
 
 export default function EventsCarousel() {
   const { events, getAllEvents } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllEvents();
+    const fetchEvents = async () => {
+      await getAllEvents();
+      setLoading(false);
+    };
+    fetchEvents();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="spinner-container">
+        <div className="spinner"></div>
+        <p>Loading events...</p>
+      </div>
+    );
+  }
 
   if (!events || events.length === 0) {
     return <p className="no-events-msg">No upcoming events at present.</p>;
