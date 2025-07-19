@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./Footer.css";
 
 export default function Footer() {
+  const token = localStorage.getItem("token");
   return (
     <footer className="footer">
       <div className="footer-top">
@@ -20,9 +21,11 @@ export default function Footer() {
             <li>
               <Link to="/events">Events</Link>
             </li>
-            <li>
-              <Link to="/bookings">My Bookings</Link>
-            </li>
+            {token && (
+              <li>
+                <Link to="/bookings">My Bookings</Link>
+              </li>
+            )}
             <li>
               <Link to="/login">Login</Link>
             </li>
