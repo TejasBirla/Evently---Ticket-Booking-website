@@ -14,7 +14,7 @@ export const finalizePaidBooking = async (req, res) => {
         .json({ success: false, message: "Time is required" });
     }
 
-    // Verify payment
+    //  Verify payment with Cashfree
     const response = await axios.get(
       `https://sandbox.cashfree.com/pg/orders/${orderId}`,
       {
@@ -34,7 +34,7 @@ export const finalizePaidBooking = async (req, res) => {
       });
     }
 
-    // Get event
+    //  Find event
     const event = await Event.findById(eventID);
     if (!event) {
       return res
@@ -42,8 +42,13 @@ export const finalizePaidBooking = async (req, res) => {
         .json({ success: false, message: "Event not found." });
     }
 
-    // Check time-specific seat conflicts
-    const timeSeats = event.bookedSeats?.get(time) || [];
+    //  Ensure bookedSeats is a proper Map
+    if (!event.bookedSeats || typeof event.bookedSeats.get !== "function") {
+      event.bookedSeats = new Map(Object.entries(event.bookedSeats || {}));
+    }
+
+    //  Check time-specific seat conflicts
+    const timeSeats = event.bookedSeats.get(time) || [];
     const isConflict = seats.some((seat) => timeSeats.includes(seat));
 
     if (isConflict) {
@@ -53,7 +58,7 @@ export const finalizePaidBooking = async (req, res) => {
       });
     }
 
-    // Create booking
+    //  Create booking
     const booking = await Booking.create({
       event: eventID,
       user: user._id,
@@ -64,12 +69,12 @@ export const finalizePaidBooking = async (req, res) => {
       paymentId: orderId,
     });
 
-    // Update bookedSeats
+    //  Update bookedSeats
     const updatedSeats = [...timeSeats, ...seats];
     event.bookedSeats.set(time, updatedSeats);
     await event.save();
 
-    // Send confirmation mail
+    //  Send confirmation mail
     await transporter.sendMail({
       from: '"Evently Bhilwara" <yourmail@gmail.com>',
       to: user.email,
@@ -125,28 +130,29 @@ export const cancelBooking = async (req, res) => {
         .json({ success: false, message: "Event not found." });
     }
 
-    // Get the seats booked at the specified time using Map.get()
-    const bookedSeatsAtTime = event.bookedSeats.get(time) || [];
+    // Ensure bookedSeats is a proper Map
+    if (!event.bookedSeats || typeof event.bookedSeats.get !== "function") {
+      event.bookedSeats = new Map(Object.entries(event.bookedSeats || {}));
+    }
 
-    // Remove canceled seats from the booked seats at that time
+    // ✅ Get seats for this time and remove the ones being cancelled
+    const bookedSeatsAtTime = event.bookedSeats.get(time) || [];
     const updatedSeats = bookedSeatsAtTime.filter(
       (seat) => !seats.includes(seat)
     );
 
-    // Update the Map with new seats array using Map.set()
+    //  Update the map
     event.bookedSeats.set(time, updatedSeats);
-
-    // Save updated event
     await event.save();
 
-    // Delete the booking documents for that user, event, and time
+    //  Remove booking record(s)
     await Booking.deleteMany({
       event: eventID,
       user: user._id,
       time: time,
     });
 
-    // Send refund email (your existing mail sending code)
+    //  Send refund mail
     await transporter.sendMail({
       from: '"Evently Bhilwara"',
       to: user.email,
