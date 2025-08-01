@@ -23,7 +23,7 @@ export default function Footer() {
             </li>
             {token && (
               <li>
-                <Link to="/bookings">My Bookings</Link>
+                <Link to="/mybookings">My Bookings</Link>
               </li>
             )}
             {!token && (
