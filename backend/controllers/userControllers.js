@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import Booking from "../models/bookingModel.js";
+import transporter from "../lib/nodemailer.js";
 
 //User and admin register
 export const registerUser = async (req, res) => {
@@ -107,6 +108,46 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in loginUser:", error.message);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+//Subscribe to newsletter
+export const newsLetterSubscribe = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email.trim()) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Email address is required" });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invaild email address" });
+    }
+    transporter.sendMail({
+      from: "Evently Bhilwara <no-reply@evently.com>",
+      to: email,
+      subject: "Newsletter Subscription for Evently",
+      html: `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px;">
+      <h2 style="color: #2c3e50; text-align: center;">Welcome to Evently 🎉</h2>
+      <p>Dear Subscriber,</p>
+      <p>Thank you for subscribing to <strong>Evently Bhilwara</strong>. We’re delighted to have you with us!</p>
+      <p>You’ll now receive the latest updates, event announcements, and exclusive news straight to your inbox.</p>
+      <p>If you ever wish to unsubscribe, you can do so anytime by clicking the unsubscribe link in our emails.</p>
+      <p style="margin-top: 20px;">Warm regards,<br><strong>Team Evently</strong></p>
+    </div>
+  `,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Subscription successful!`,
+    });
+  } catch (error) {
+    console.error("Error in newsLetterSubscribe:", error.message);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
