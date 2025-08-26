@@ -92,6 +92,18 @@ export const AuthProvider = ({ children }) => {
     toast.success("Logout successful.");
   };
 
+  const subscribeToNewsLetter = async (email) => {
+    try {
+      const { data } = await axios.post("/api/user/newsletter", { email });
+      if (data.success) {
+        toast.success(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong.");
+    }
+  };
+
   const getAllEvents = async () => {
     try {
       const { data } = await axios.get("/api/event/allevents");
@@ -131,7 +143,7 @@ export const AuthProvider = ({ children }) => {
           orderId,
           eventID: bookingInfo.eventID,
           seats: bookingInfo.seats,
-          time:bookingInfo.time,
+          time: bookingInfo.time,
           amount,
         })
       );
@@ -208,6 +220,7 @@ export const AuthProvider = ({ children }) => {
     authUser,
     signupUser,
     loginUser,
+    subscribeToNewsLetter,
     logoutUser,
     allBookingDetails,
     allBookings,

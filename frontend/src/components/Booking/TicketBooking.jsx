@@ -1,111 +1,30 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./TicketBooking.css";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { AuthContext } from "../../Contexts/AuthContext.jsx";
-import { formatTime } from "../../libs/util.js";
+import { formatDate, formatTime } from "../../libs/util.js";
+import { AuthContext } from "../../Contexts/AuthContext";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function TicketBooking() {
-  const { singleEvent, getSingleEvent, initiateBooking } =
+  const { initiateBooking, getSingleEvent, singleEvent } =
     useContext(AuthContext);
-  const token = localStorage.getItem("token");
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [selectedTime, setSelectedTime] = useState("");
   const [loader, setLoader] = useState(false);
+  const token = localStorage.getItem("token");
 
+  // Fetch event on mount or id change
   useEffect(() => {
     getSingleEvent(id);
   }, [id]);
 
-  const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-  const seatsPerRow = 6;
-  const leftRows = rows.slice(0, 5);
-  const rightRows = rows.slice(5);
+  console.log(singleEvent);
 
-  const isSeatBooked = (seatId) => {
-    if (!selectedTime || !singleEvent?.bookedSeats) return false;
-
-    const seatsForTime = singleEvent.bookedSeats[selectedTime] || [];
-    return seatsForTime.includes(seatId);
-  };
-
-  const toggleSeat = (seatId) => {
-    if (isSeatBooked(seatId)) return;
-
-    setSelectedSeats((prev) => {
-      if (prev.includes(seatId)) {
-        return prev.filter((seat) => seat !== seatId);
-      } else if (prev.length >= 5) {
-        toast.error("You can only select up to 5 seats.");
-        return prev;
-      } else {
-        return [...prev, seatId];
-      }
-    });
-  };
-
-  const handleBooking = () => {
-    if (!singleEvent || selectedSeats.length === 0) return;
-
-    if (!selectedTime) {
-      toast.error("Please select a showtime.");
-      return;
-    }
-
-    const unavailableSeats = selectedSeats.filter((seat) =>
-      (singleEvent.bookedSeats[selectedTime] || []).includes(seat)
-    );
-
-    if (unavailableSeats.length > 0) {
-      toast.error(
-        `Seats ${unavailableSeats.join(
-          ", "
-        )} were just booked. Please reselect.`
-      );
-
-      setSelectedSeats((prev) =>
-        prev.filter((seat) => !unavailableSeats.includes(seat))
-      );
-
-      return;
-    }
-
-    setLoader(true);
-    const bookingData = {
-      eventID: singleEvent._id,
-      seats: selectedSeats,
-      time: selectedTime,
-    };
-    initiateBooking(bookingData);
-  };
-
-  const bookTicket = () => {
-    if (token) {
-      handleBooking();
-      return;
-    } else {
-      localStorage.setItem(
-        "redirectAfterLogin",
-        JSON.stringify({
-          path: location.pathname,
-          selectedSeats,
-          selectedTime,
-        })
-      );
-      toast("Please login to continue.", {
-        icon: "🔒",
-        duration: 1500,
-      });
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-    }
-  };
-
+  // Restore seats/time after login
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem("redirectAfterLogin"));
 
@@ -116,7 +35,7 @@ export default function TicketBooking() {
       singleEvent.bookedSeats
     ) {
       const bookedForSavedTime =
-        singleEvent.bookedSeats[savedData.selectedTime] || [];
+        singleEvent.bookedSeats[savedData.selectedShowtime] || [];
 
       const validSeats = savedData.selectedSeats?.filter(
         (seat) => !bookedForSavedTime.includes(seat)
@@ -129,7 +48,8 @@ export default function TicketBooking() {
       }
 
       setSelectedSeats(validSeats || []);
-      if (savedData.selectedTime) setSelectedTime(savedData.selectedTime);
+      if (savedData.selectedShowtime)
+        setSelectedShowtime(savedData.selectedShowtime);
 
       setTimeout(() => {
         localStorage.removeItem("redirectAfterLogin");
@@ -137,112 +57,141 @@ export default function TicketBooking() {
     }
   }, [location.pathname, singleEvent]);
 
+  // Limit seat selection to 5
+  const toggleSeat = (seat) => {
+    if (selectedSeats.includes(seat)) {
+      setSelectedSeats(selectedSeats.filter((s) => s !== seat));
+    } else if (selectedSeats.length >= 5) {
+      toast.error("You can only select up to 5 seats.");
+    } else {
+      setSelectedSeats([...selectedSeats, seat]);
+    }
+  };
+
+  const handleBooking = () => {
+    if (!selectedShowtime || selectedSeats.length === 0) {
+      toast.error("Please select showtime and seats.");
+      return;
+    }
+
+    // Check for already booked seats
+    const bookedSeatsForTime =
+      singleEvent?.bookedSeats?.[selectedShowtime] || [];
+    const unavailableSeats = selectedSeats.filter((seat) =>
+      bookedSeatsForTime.includes(seat)
+    );
+
+    if (unavailableSeats.length > 0) {
+      toast.error(
+        `Seats ${unavailableSeats.join(
+          ", "
+        )} were just booked. Please reselect.`
+      );
+      setSelectedSeats((prev) =>
+        prev.filter((seat) => !unavailableSeats.includes(seat))
+      );
+      return;
+    }
+
+    setLoader(true);
+    const bookingData = {
+      eventID: singleEvent._id,
+      seats: selectedSeats,
+      time: selectedShowtime,
+    };
+    initiateBooking(bookingData);
+  };
+
+  // Handle login redirect if not logged in
+  const bookTicket = () => {
+    if (token) {
+      handleBooking();
+    } else {
+      localStorage.setItem(
+        "redirectAfterLogin",
+        JSON.stringify({
+          path: location.pathname,
+          selectedSeats,
+          selectedShowtime,
+        })
+      );
+      toast("Please login to continue.", { icon: "🔒", duration: 1500 });
+      setTimeout(() => navigate("/login"), 1000);
+    }
+  };
+
   return (
-    <div className="booking-container">
-      <div className="booking-layout">
-        {/* TIME SELECTION - LEFT */}
-        <div className="time-selection">
-          <h3>Select Showtime:</h3>
-          <div className="time-list">
-            {singleEvent?.time?.map((t, i) => (
-              <div
-                key={i}
-                className={`time-item ${
-                  selectedTime === t ? "selected-time" : ""
-                }`}
-                onClick={() => {
-                  setSelectedTime(t);
-                  setSelectedSeats([]); // reset seat selection when time changes
-                }}
-              >
-                {formatTime(t)}
-              </div>
-            ))}
+    <div className="ticket-container">
+      <div className="ticket-header">
+        <h1>{singleEvent?.title}</h1>
+        <p className="ticket-meta">
+          📍 {singleEvent?.venue} | {formatDate(singleEvent?.date)} |⏰{" "}
+          {singleEvent?.time?.map((t, i) => (
+            <span key={i}>
+              {formatTime(t)}
+              {i < singleEvent.time.length - 1 ? ", " : ""}
+            </span>
+          ))}
+        </p>
+      </div>
+      <div className="ticket-main">
+        <div className="ticket-left">
+          <div className="ticket-banner">
+            <img src={singleEvent?.image} alt={singleEvent?.title} />
           </div>
+          <p className="ticket-desc">{singleEvent?.description}</p>
         </div>
-
-        {/* SEATS SECTION - RIGHT */}
-        <div className="seats-section">
-          <div className="stage">STAGE</div>
-          <div className="stage-label">Stage this side</div>
-
-          <div className="seats-layout">
-            {/* LEFT SIDE */}
-            <div className="seat-side">
-              {leftRows.map((row) => (
-                <div className="seat-row" key={row}>
-                  {Array.from({ length: seatsPerRow }, (_, i) => {
-                    const seatId = `${row}${i + 1}`;
-                    return (
-                      <div
-                        key={i}
-                        className={`seat ${
-                          isSeatBooked(seatId) ? "booked" : ""
-                        } ${selectedSeats.includes(seatId) ? "selected" : ""}`}
-                        onClick={() => toggleSeat(seatId)}
-                      >
-                        {seatId}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div className="aisle" />
-
-            {/* RIGHT SIDE */}
-            <div className="seat-side">
-              {rightRows.map((row) => (
-                <div className="seat-row" key={row}>
-                  {Array.from({ length: seatsPerRow }, (_, i) => {
-                    const seatId = `${row}${i + 1}`;
-                    return (
-                      <div
-                        key={i}
-                        className={`seat ${
-                          isSeatBooked(seatId) ? "booked" : ""
-                        } ${selectedSeats.includes(seatId) ? "selected" : ""}`}
-                        onClick={() => toggleSeat(seatId)}
-                      >
-                        {seatId}
-                      </div>
-                    );
-                  })}
-                </div>
+        <div className="ticket-right">
+          <div className="ticket-section">
+            <h3>Choose Showtime</h3>
+            <div className="showtime-options">
+              {singleEvent?.time?.map((time, idx) => (
+                <button
+                  key={idx}
+                  className={`showtime-btn ${
+                    selectedShowtime === time ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedShowtime(time);
+                    setSelectedSeats([]);
+                  }}
+                >
+                  {formatTime(time)}
+                </button>
               ))}
             </div>
           </div>
-
-          <div className="booking-actions">
-            <p>
-              Selected Seats:{" "}
-              <span>
-                {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
-              </span>
-            </p>
-            <button
-              className="book-button"
-              onClick={bookTicket}
-              disabled={selectedSeats.length === 0 || loader || !selectedTime}
-            >
-              {loader ? "Redirecting..." : "Book Now"}
+          <div className="ticket-section">
+            <h3>Select Seats</h3>
+            <div className="seats-grid">
+              {Array.from({ length: 30 }, (_, i) => {
+                const seat = `A${i + 1}`;
+                const bookedSeatsForTime =
+                  singleEvent?.bookedSeats?.[selectedShowtime] || [];
+                const isBooked = bookedSeatsForTime.includes(seat);
+                return (
+                  <div
+                    key={seat}
+                    className={`seat ${
+                      selectedSeats.includes(seat) ? "selected" : ""
+                    } ${isBooked ? "booked" : ""}`}
+                    onClick={() => !isBooked && toggleSeat(seat)}
+                  >
+                    {seat}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="seat-legend">
+              <span className="legend available">⬜ Available</span>
+              <span className="legend selected">🟦 Selected</span>
+              <span className="legend booked">🟥 Booked</span>
+            </div>
+          </div>
+          <div className="ticket-summary">
+            <button className="book-btn" onClick={bookTicket} disabled={loader}>
+              {loader ? "Redirecting..." : "Proceed to Payment"}
             </button>
-          </div>
-
-          <div className="legend">
-            <div className="legend-item">
-              <div className="legend-box available"></div>
-              <span>Available</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-box selected"></div>
-              <span>Selected</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-box booked"></div>
-              <span>Booked</span>
-            </div>
           </div>
         </div>
       </div>

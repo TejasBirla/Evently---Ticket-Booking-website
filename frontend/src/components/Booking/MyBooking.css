@@ -1,6 +1,6 @@
 .my-bookings-container {
     max-width: 900px;
-    margin: 32px auto;
+    margin: 32px auto 64px auto;
     padding: 16px;
 }
 
@@ -73,5 +73,105 @@
     text-align: center;
     margin-top: 32px;
     font-size: 18px;
-    margin-bottom: 30%;
+    margin-bottom: 36%;
+}
+
+@media (max-width:600px) {
+    .bookings-title {
+        font-size: 26px;
+    }
+
+    .booking-image {
+        height: 185px;
+
+    }
+
+    .booking-info p {
+        font-size: 15px;
+    }
+
+    .event-title {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .cancel-button {
+        font-weight: 500;
+    }
+
+    .no-booking-msg {
+        font-size: 16px;
+    }
+}
+
+@media (max-width:500px) {
+    .bookings-title {
+        font-size: 24px;
+    }
+
+    .booking-image {
+        height: 155px;
+        width: 160px;
+
+    }
+
+    .booking-info p {
+        font-size: 14px;
+    }
+
+    .event-title {
+        font-size: 16px;
+    }
+
+    .cancel-button {
+        font-weight: 400;
+    }
+
+    .no-booking-msg {
+        font-size: 14px;
+    }
+}
+
+
+@media (max-width: 440px) {
+    .bookings-title {
+        font-size: 22px;
+    }
+
+    .booking-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .booking-image {
+        width: 100%;
+        max-width: 180px;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .booking-info {
+        width: 100%;
+    }
+
+    .booking-info p {
+        font-size: 13px;
+    }
+
+    .event-title {
+        font-size: 16px;
+    }
+
+    .cancel-button {
+        width: 100%;
+        font-weight: 400;
+        padding: 8px 12px;
+    }
+
+    .no-booking-msg {
+        font-size: 12px;
+    }
 }

@@ -43,3 +43,32 @@
     background-color: #ff4d4d;
     color: white;
 }
+
+@media (max-width: 500px) {
+    .modal-box {
+        padding: 16px;
+        max-width: 300px;
+    }
+
+    .modal-box h3 {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    .modal-box p {
+        font-size: 14px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 12px;
+        font-weight: normal;
+    }
+}

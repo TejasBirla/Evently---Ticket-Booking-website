@@ -43,25 +43,30 @@ export default function EventsCarousel() {
         modules={[Navigation]}
         className="event-swiper"
         breakpoints={{
-          320: { slidesPerView: 1 },
-          640: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
+          320: { slidesPerView: 1, spaceBetween: 15 },
+          480: { slidesPerView: 1, spaceBetween: 15 },
+          640: { slidesPerView: 2, spaceBetween: 20 },
+          768: { slidesPerView: 2, spaceBetween: 25 },
+          1024: { slidesPerView: 3, spaceBetween: 30 },
+          1280: { slidesPerView: 3, spaceBetween: 30 },
         }}
       >
         {events.map((event) => (
           <SwiperSlide key={event._id}>
-            <div className="event-card">
+            <div className="event-carousel-card">
               <Link to={`/event/${event._id}`} className="event-link">
                 <img
                   src={event.image}
                   alt={event.title}
-                  className="event-image"
+                  className="event-carousel-image"
                 />
-                <div className="all-event-info">
-                  <h3 className="all-event-title">{event.title}</h3>
-                  <p className="all-event-date">{formatDate(event.date)}</p>
-                  <p className="all-event-location">{event.venue}</p>
-                  <p className="all-event-desc">{event.description}</p>
+                <div className="carousel-event-info">
+                  <h3 className="carousel-event-title">{event.title}</h3>
+                  <p className="carousel-event-date">
+                    {formatDate(event.date)}
+                  </p>
+                  <p className="carousel-event-location">{event.venue}</p>
+                  <p className="carousel-event-desc">{event.description}</p>
                 </div>
               </Link>
             </div>

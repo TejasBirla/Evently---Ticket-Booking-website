@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link} from "react-router-dom";
 import "./Signup.css";
 import { AuthContext } from "../../Contexts/AuthContext";
 
@@ -8,13 +8,11 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const signupData = { email, fullName, password };
-    signupUser(signupData);
-    navigate("/");
+    signupUser(signupData);;
   };
 
   return (

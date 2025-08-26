@@ -1,4 +1,3 @@
-
 .signup-container {
     max-width: 400px;
     margin: 80px auto;
@@ -66,4 +65,92 @@
     font-weight: 500;
     cursor: pointer;
     text-decoration: none;
+}
+
+
+@media (max-width: 800px) {
+    .signup-container {
+        margin: 65px auto;
+        padding: 25px;
+    }
+
+    .signup-heading {
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    .signup-subtext {
+        font-size: 15px;
+    }
+
+    .signup-form input {
+        font-size: 15px;
+    }
+
+    .signup-submit {
+        font-size: 15px;
+    }
+
+    .login-link {
+        font-size: 14px;
+    }
+}
+
+
+@media (max-width: 500px) {
+    .signup-container {
+        max-width: 330px;
+        padding: 18px;
+        margin: 55px auto;
+    }
+
+    .signup-heading {
+        font-size: 24px;
+        font-weight: 500;
+    }
+
+    .signup-subtext {
+        font-size: 14px;
+    }
+
+    .signup-form input {
+        font-size: 14px;
+    }
+
+    .signup-submit {
+        font-size: 14px;
+    }
+
+    .login-link {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .signup-container {
+        max-width: 310px;
+        padding: 14px;
+        margin: 50px auto;
+    }
+
+    .signup-heading {
+        font-size: 23px;
+        font-weight: 500;
+    }
+
+    .signup-subtext {
+        font-size: 12px;
+    }
+
+    .signup-form input {
+        font-size: 13px;
+    }
+
+    .signup-submit {
+        font-size: 13px;
+    }
+
+    .login-link {
+        font-size: 12px;
+    }
 }

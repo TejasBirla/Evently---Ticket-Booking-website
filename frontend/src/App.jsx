@@ -20,7 +20,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>Loading...</div>
-    ); // ⏳ Show while checking localStorage
+    ); //Show while checking localStorage
   }
   return (
     <>

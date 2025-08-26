@@ -1,13 +1,54 @@
-.payment-status-page {
-    text-align: center;
-    padding-top: 5rem;
-    margin-bottom: 13rem;
-}
-
 .success-msg {
     color: green;
 }
 
 .error-msg {
     color: red;
+}
+
+.payment-status-page {
+    text-align: center;
+    padding-top: 5rem;
+    margin-bottom: 13rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.payment-status-page h2 {
+    font-size: 2rem;
+}
+
+.payment-status-page p {
+    font-size: 1rem;
+}
+
+
+@media (max-width: 768px) {
+    .payment-status-page {
+        padding-top: 4rem;
+        margin-bottom: 8rem;
+    }
+
+    .payment-status-page h2 {
+        font-size: 1.55rem;
+    }
+
+    .payment-status-page p {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-status-page {
+        padding-top: 3rem;
+        margin-bottom: 5rem;
+    }
+
+    .payment-status-page h2 {
+        font-size: 1.2rem;
+    }
+
+    .payment-status-page p {
+        font-size: 0.8rem;
+    }
 }
