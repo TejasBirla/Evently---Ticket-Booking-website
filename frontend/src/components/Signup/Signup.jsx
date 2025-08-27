@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Signup.css";
 import { AuthContext } from "../../Contexts/AuthContext";
 
@@ -8,11 +8,17 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [isSigning, setIsSigning] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    setIsSigning(true);
+    event.preventDefault();
     const signupData = { email, fullName, password };
-    signupUser(signupData);;
+    try {
+      await signupUser(signupData);
+    } finally {
+      setIsSigning(false);
+    }
   };
 
   return (
@@ -28,20 +34,25 @@ export default function Signup() {
           placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
+          disabled={isSigning}
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={isSigning}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          disabled={isSigning}
         />
-        <button className="signup-submit">Sign Up</button>
+        <button className="signup-submit" disabled={isSigning}>
+          {isSigning ? "Signing In..." : "Sign Up"}
+        </button>
       </form>
 
       <p className="login-link">

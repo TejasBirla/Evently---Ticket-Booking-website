@@ -7,11 +7,23 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const { subscribeToNewsLetter } = useContext(AuthContext);
   const token = localStorage.getItem("token");
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const handleSubmit = (event) => {
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
+  //   subscribeToNewsLetter(email);
+  //   setEmail("");
+  // };
+
+  const handleSubmit = async (event) => {
+    setIsSubscribing(true); // start loading state
     event.preventDefault();
-    subscribeToNewsLetter(email);
-    setEmail("");
+    try {
+      await subscribeToNewsLetter(email); // wait for promise to resolve
+      setEmail(""); // clear input after success
+    } finally {
+      setIsSubscribing(false); // stop loading state
+    }
   };
 
   return (
@@ -52,7 +64,10 @@ export default function Footer() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <button type="submit">Subscribe Now</button>
+            {/* <button type="submit">Subscribe Now</button> */}
+            <button type="submit" disabled={isSubscribing}>
+              {isSubscribing ? "Subscribing..." : "Subscribe Now"}
+            </button>
           </form>
         </div>
 

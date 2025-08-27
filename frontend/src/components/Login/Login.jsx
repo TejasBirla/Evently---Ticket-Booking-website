@@ -7,14 +7,20 @@ export default function Login() {
   const { loginUser } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleEmail = (event) => setEmail(event.target.value);
   const handlePassword = (event) => setPassword(event.target.value);
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
+    setIsLoggingIn(true);
     event.preventDefault();
     const loginData = { email, password };
-    loginUser(loginData);
+    try {
+      await loginUser(loginData);
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -30,15 +36,17 @@ export default function Login() {
           placeholder="Email Address"
           value={email}
           onChange={handleEmail}
+          disabled={isLoggingIn}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={handlePassword}
+          disabled={isLoggingIn}
         />
-        <button className="login-submit" type="submit">
-          Login
+        <button className="login-submit" type="submit" disabled={isLoggingIn}>
+          {isLoggingIn ? "Logging In..." : "Login"}
         </button>
       </form>
 

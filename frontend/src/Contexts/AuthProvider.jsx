@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [redirectUrl, setRedirectUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingBooking, setLoadingBookings] = useState(false);
 
   //navigate to other pages
   const navigate = useNavigate();
@@ -201,6 +202,7 @@ export const AuthProvider = ({ children }) => {
 
   const allBookings = async () => {
     try {
+      setLoadingBookings(true);
       const { data } = await axios.get("/api/user/all/bookings");
       if (data.success) {
         setAllBookingDetails(data.allBookings);
@@ -208,6 +210,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.log(error.message);
       toast.error(error.response.data.message);
+    } finally {
+      setLoadingBookings(false);
     }
   };
 
@@ -236,6 +240,7 @@ export const AuthProvider = ({ children }) => {
     subscribeToNewsLetter,
     logoutUser,
     allBookingDetails,
+    loadingBooking,
     allBookings,
 
     //Events
