@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -9,22 +9,13 @@ import { AuthContext } from "../../Contexts/AuthContext.jsx";
 import { formatDate } from "../../libs/util.js";
 
 export default function EventsCarousel() {
-  const { events, getAllEvents } = useContext(AuthContext);
-  const [loading, setLoading] = useState(true);
+  const { events, loadingEvents } = useContext(AuthContext);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      await getAllEvents();
-      setLoading(false);
-    };
-    fetchEvents();
-  }, []);
-
-  if (loading) {
+  if (loadingEvents) {
     return (
       <div className="spinner-container">
         <div className="spinner"></div>
-        <p>Loading events...</p>
+        <p>Loading</p>
       </div>
     );
   }

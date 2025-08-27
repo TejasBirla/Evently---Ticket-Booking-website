@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [allBookingDetails, setAllBookingDetails] = useState([]);
   const [redirectUrl, setRedirectUrl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   //navigate to other pages
   const navigate = useNavigate();
@@ -39,6 +40,28 @@ export const AuthProvider = ({ children }) => {
       }, 50);
     }
   }, [authUser, redirectUrl, navigate]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const { data } = await axios.get("/api/event/allevents");
+        if (data.success) {
+          setAllEvents(data.allEvents);
+        }
+      } catch (error) {
+        console.log(error.message);
+        toast.error(error.response?.data?.message || "Failed to fetch events");
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    if (events.length === 0) {
+      fetchEvents();
+    } else {
+      setLoadingEvents(false);
+    }
+  }, []);
 
   const signupUser = async (signupData) => {
     try {
@@ -104,20 +127,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const getAllEvents = async () => {
-    try {
-      const { data } = await axios.get("/api/event/allevents");
-      if (data.success) {
-        setAllEvents(data.allEvents);
-      }
-    } catch (error) {
-      console.log(error.message);
-      toast.error(error.response.data.message);
-    }
-  };
-
   const getSingleEvent = async (id) => {
     try {
+      setSingleEvent(null);
       const { data } = await axios.get(`/api/event/${id}`);
       if (data.success) {
         setSingleEvent(data.event);
@@ -218,6 +230,7 @@ export const AuthProvider = ({ children }) => {
     //User
     loading,
     authUser,
+    loadingEvents,
     signupUser,
     loginUser,
     subscribeToNewsLetter,
@@ -227,7 +240,6 @@ export const AuthProvider = ({ children }) => {
 
     //Events
     events,
-    getAllEvents,
     singleEvent,
     getSingleEvent,
 

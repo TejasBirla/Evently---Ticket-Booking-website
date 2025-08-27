@@ -17,7 +17,12 @@ export default function SingleEvent() {
   }, [id]);
 
   if (!singleEvent) {
-    return <div className="loading-event">Loading event...</div>;
+    return (
+      <div className="spinner-container">
+        <div className="spinner"></div>
+        <p>Loading</p>
+      </div>
+    );
   }
 
   return (
@@ -31,7 +36,6 @@ export default function SingleEvent() {
           <CalendarDays size={18} className="icon" />{" "}
           {formatDate(singleEvent.date)}
         </p>
-
         <div className="event-time">
           <Clock size={18} className="icon" />
           {singleEvent.time.map((t, idx) => (
@@ -41,7 +45,6 @@ export default function SingleEvent() {
             </span>
           ))}
         </div>
-
         <p className="event-location">
           <MapPin size={18} className="icon" /> {singleEvent.venue}
         </p>
