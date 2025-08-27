@@ -33,6 +33,7 @@ const eventSchema = new mongoose.Schema(
     totalSeats: {
       type: Number,
       required: true,
+      default: 30,
     },
     bookedSeats: {
       type: Map,
