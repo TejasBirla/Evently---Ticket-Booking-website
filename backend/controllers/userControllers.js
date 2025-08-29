@@ -69,7 +69,7 @@ export const registerUser = async (req, res) => {
 
 //user and admin login
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, adminCode } = req.body;
 
   if (!email || !password) {
     return res
@@ -83,6 +83,22 @@ export const loginUser = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Email address not found." });
+    }
+
+    if (adminCode) {
+      if (user.role !== "admin") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized Access to admin panel.",
+        });
+      }
+
+      if (adminCode !== process.env.ADMIN_SECRET) {
+        return res.status(401).json({
+          success: false,
+          message: "Incorrect Admin code.",
+        });
+      }
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -144,7 +160,7 @@ export const newsLetterSubscribe = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Subscription successful!`,
+      message: "Subscription successful!",
     });
   } catch (error) {
     console.error("Error in newsLetterSubscribe:", error.message);

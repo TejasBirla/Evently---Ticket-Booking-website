@@ -49,6 +49,13 @@ export const createEvent = async (req, res) => {
     const { title, description, date, time, venue, price, totalSeats, image } =
       req.body;
 
+    if (!title || !description || !date || !venue || !price || !totalSeats) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required.",
+      });
+    }
+
     if (
       !Array.isArray(time) ||
       time.length === 0 ||
