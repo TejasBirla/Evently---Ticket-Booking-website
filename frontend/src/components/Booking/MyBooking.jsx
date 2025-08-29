@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../../Contexts/AuthContext.jsx";
 import { formatTime, formatDate } from "../../libs/util.js";
 import ConfirmDialog from "../ConfirmDialog/ConfirmDialog.jsx";
@@ -66,11 +67,14 @@ export default function MyBooking() {
       ) : (
         mergedBookings.map((booking) => (
           <div key={booking?._id} className="booking-card">
-            <img
-              src={booking?.event?.image}
-              alt={booking?.event?.title}
-              className="booking-image"
-            />
+            <Link to={`/event/${booking?.event?._id}`}>
+              <img
+                src={booking?.event?.image}
+                alt={booking?.event?.title}
+                className="booking-image"
+              />
+            </Link>
+
             <div className="booking-info">
               <h3 className="event-title">{booking?.event?.title}</h3>
               <p>
