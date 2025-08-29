@@ -222,10 +222,14 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (data.success) {
-        toast.success(data.message);
         setAllBookingDetails((prev) =>
           prev.filter((booking) => booking._id !== bookingData.bookingId)
         );
+        toast.success(data.message);
+
+        setTimeout(() => {
+          allBookings();
+        }, 1000);
       }
     } catch (error) {
       console.log(error.message);
