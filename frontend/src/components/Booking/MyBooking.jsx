@@ -93,6 +93,7 @@ export default function MyBooking() {
                 className="cancel-button"
                 onClick={() =>
                   openConfirm({
+                    bookingId: booking._id,
                     eventID: booking.event._id,
                     seats: booking.seats,
                     time: booking.time,
