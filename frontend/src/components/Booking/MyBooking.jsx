@@ -67,7 +67,7 @@ export default function MyBooking() {
       ) : (
         mergedBookings.map((booking) => (
           <div key={booking?._id} className="booking-card">
-            <Link to={`/book/event/${booking?.event?._id}`}>
+            <Link to={`/book/event/${booking?.event?._id}/ticket`}>
               <img
                 src={booking?.event?.image}
                 alt={booking?.event?.title}
