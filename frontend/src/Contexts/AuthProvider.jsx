@@ -223,6 +223,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         toast.success(data.message);
+        allBookings();
       }
     } catch (error) {
       console.log(error.message);
