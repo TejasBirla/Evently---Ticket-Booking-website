@@ -14,6 +14,10 @@ export const finalizePaidBooking = async (req, res) => {
         .json({ success: false, message: "Time is required" });
     }
 
+    const existing = await Booking.findOne({ paymentId: orderId });
+    if (existing)
+      return res.status(200).json({ success: true, booking: existing });
+
     //  Verify payment with Cashfree
     const response = await axios.get(
       `https://sandbox.cashfree.com/pg/orders/${orderId}`,

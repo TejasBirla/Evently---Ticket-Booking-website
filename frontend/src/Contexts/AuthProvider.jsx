@@ -188,17 +188,19 @@ export const AuthProvider = ({ children }) => {
         bookingData
       );
 
-      if (data.success) {
-        localStorage.removeItem("booking_data");
-        return { success: true };
-      } else {
-        return { success: false };
-      }
+      // Always clear localStorage to avoid old data issues
+      localStorage.removeItem("booking_data");
+      localStorage.removeItem("payment_in_progress");
+
+      return { success: data.success };
     } catch (err) {
       console.error("Finalize Booking Error:", err.message);
+      localStorage.removeItem("booking_data");
+      localStorage.removeItem("payment_in_progress");
       return { success: false };
     }
   };
+
 
   const allBookings = async () => {
     try {
