@@ -7,13 +7,15 @@ export default function Login() {
   const { loginAdmin } = useContext(EventContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [adminCode, setAdminCode] = useState("");
 
   const handleEmail = (event) => setEmail(event.target.value);
   const handlePassword = (event) => setPassword(event.target.value);
+  const handleAdminCode = (event) => setAdminCode(event.target.value);
 
   const handleLogin = (event) => {
     event.preventDefault();
-    const adminData = { email, password };
+    const adminData = { email, password, adminCode };
     loginAdmin(adminData);
   };
 
@@ -34,6 +36,12 @@ export default function Login() {
           placeholder="Password"
           value={password}
           onChange={handlePassword}
+        />
+        <input
+          type="password"
+          placeholder="Admin Code"
+          value={adminCode}
+          onChange={handleAdminCode}
         />
         <button className="login-submit" type="submit">
           Login
