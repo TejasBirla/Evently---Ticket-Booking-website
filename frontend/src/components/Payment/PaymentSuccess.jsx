@@ -89,23 +89,26 @@ export default function PaymentSuccess() {
 
         // Small delay for smoother UX
         await new Promise((res) => setTimeout(res, 1000));
-        
-        await finalizeBooking();
+
+        const result = await finalizeBooking(); // <-- store result
 
         if (!isMounted) return;
 
-        // Booking succeeded (verified by backend)
-        localStorage.removeItem("payment_in_progress");
-        setStatus("success");
-
-        // Redirect after 3 seconds
-        setTimeout(() => navigate("/mybookings"), 3000);
+        if (result.success) {
+          localStorage.removeItem("payment_in_progress");
+          setStatus("success");
+          setTimeout(() => navigate("/mybookings"), 3000);
+        } else {
+          localStorage.removeItem("payment_in_progress");
+          setStatus("error");
+          toast.error("❌ Payment failed or could not be verified.");
+        }
       } catch (err) {
         console.error("Error during finalize:", err.message);
         if (isMounted) {
           setStatus("error");
           localStorage.removeItem("payment_in_progress");
-          toast.error("❌ Payment failed or could not be verified.");
+          toast.error("❌ Something went wrong during booking finalization.");
         }
       }
     };
