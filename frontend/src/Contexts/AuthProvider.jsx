@@ -224,17 +224,6 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         toast.success(data.message);
-
-        setAllBookingDetails((prev) =>
-          prev.filter(
-            (booking) =>
-              !(
-                booking.event._id === bookingData.eventID &&
-                booking.time === bookingData.time &&
-                booking.seats.every((seat) => bookingData.seats.includes(seat))
-              )
-          )
-        );
       }
     } catch (error) {
       console.log(error.message);
