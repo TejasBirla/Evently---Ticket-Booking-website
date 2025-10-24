@@ -23,10 +23,10 @@ export default function MyBooking() {
     setShowConfirm(true);
   };
 
-  const handleCancelConfirmed = () => {
+  const handleCancelConfirmed = async () => {
     const { eventID, seats, amount, time } = selectedBooking;
     const bookingData = { eventID, seats, amount, time };
-    cancelBooking(bookingData);
+    await cancelBooking(bookingData);
     setShowConfirm(false);
   };
 
